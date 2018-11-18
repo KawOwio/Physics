@@ -45,7 +45,7 @@ private:
 
 	/** A physics object
 	*/
-	GameObject* _kinematics_object;
+
 	/** An example game level in the scene
 	*/
 	GameObject* _level; 

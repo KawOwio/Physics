@@ -38,9 +38,6 @@ public:
 	/** Set velocity for the object
 	* @param glm::vec3 vel a 3D vector for the velocity of the object
 	*/
-	void SetInitialVelocity(glm::vec3 vel) { _vInitial = vel; }
-
-	void SetFinishVelocity(glm::vec3 vel) { _vFinish = vel; }
 
 	/** Set scale for the object
 	* @param glm::vec3 vel a 3D vector for the scale of the object
@@ -60,11 +57,7 @@ public:
 	*/
 	void StartSimulation(bool start) { _start = start; }
 
-	bool GetStart() { return _start; }
-
 private:
-
-	GameObject * _kinematics_object;
 
 	/**Update the model matrix with the current position, orientation and scale
 	*

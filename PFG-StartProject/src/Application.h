@@ -17,7 +17,6 @@
 
 class Scene;
 class Input;
-class KinematicsObject;
 
 class Application
 {
@@ -44,8 +43,6 @@ private:
 	*/
 	Scene* myScene; /*!< The game scene*/
 	Input* input; /*!< The keyboard and mouse input */
-	KinematicsObject* kinematics;
-
 	
     /** STATIC MEMBERS: only one application instance running 
 	*/

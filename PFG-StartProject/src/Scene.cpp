@@ -1,11 +1,6 @@
 #include "Scene.h"
 #include "KinematicsObject.h"
 
-
-/*! \brief Brief description.
-*  Scene class is a container for loading all the game objects in your simulation or your game.
-*
-*/
 Scene::Scene()
 {
 	// Set up your scene here......
@@ -15,10 +10,9 @@ Scene::Scene()
 	// Position of the light, in world-space
 	_lightPosition = glm::vec3(10, 10, 0);
 
+	//Add new kinematic and dynamic object here:
 	_kinematics = new KinematicsObject();
 
-	// Create a game object
-	//_kinematics_object = new GameObject();
 	// Create a game level object
 	_level = new GameObject();
 
@@ -49,7 +43,6 @@ Scene::Scene()
 	_level->SetPosition(0.0f, 0.0f, 0.0f);
 	_level->SetRotation(3.141590f, 0.0f, 0.0f);
 
-
 	// Create the material for the game object- level
 	Material *objectMaterial = new Material();
 	// Shaders are now in files
@@ -66,24 +59,22 @@ Scene::Scene()
 	// If you change the light's position you need to call this again
 	objectMaterial->SetLightPosition(_lightPosition);
 	// Tell the level object to use this material
-	_kinematics_object->SetMaterial(objectMaterial);
+	_kinematics->SetMaterial(objectMaterial);
 
 	// Set the geometry for the object
 	Mesh *modelMesh = new Mesh();
 	// Load from OBJ file. This must have triangulated geometry
 	modelMesh->LoadOBJ("assets/models/sphere.obj");
 	// Tell the game object to use this mesh
-	_kinematics_object->SetMesh(modelMesh);
-	_kinematics_object->SetPosition(0.0f, 5.0f, 0.0f);
-	_kinematics_object->SetScale(0.3f, 0.3f, 0.3f);
 
-	
+	_kinematics->SetMesh(modelMesh);
 }
 
 Scene::~Scene()
 {
 	// You should neatly clean everything up here
-	delete _kinematics_object;
+	//delete _kinematics_object;
+	delete _kinematics;
 	delete _level;
 	delete _camera;
 }
@@ -97,7 +88,6 @@ void Scene::Update(float deltaTs, Input* input)
 	}
 	
 	_kinematics->Update(deltaTs);
-	_kinematics_object->Update(deltaTs);
 	_level->Update(deltaTs);
 	_camera->Update(input);
 
@@ -109,9 +99,8 @@ void Scene::Update(float deltaTs, Input* input)
 void Scene::Draw()
 {
 	// Draw objects, giving the camera's position and projection
-	_kinematics_object->Draw(_viewMatrix, _projMatrix);
 	_level->Draw(_viewMatrix, _projMatrix);
-
+	_kinematics->Draw(_viewMatrix, _projMatrix);
 }
 
 

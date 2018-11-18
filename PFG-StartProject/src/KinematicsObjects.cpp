@@ -5,13 +5,15 @@ KinematicsObject::KinematicsObject()
 {
 	// Don't start simulation yet
 	//StartSimulation(false);
+	_position = { 0.0f, 5.0f, 0.0f };
+	_scale = { 0.3f, 0.3f, 0.3f };
 	_vInitial = { 0.0f };
 	_acceleration = 9.8f;
+	UpdateModelMatrix();
 }
 
 KinematicsObject::~KinematicsObject()
 {
-	delete _kinematics_object;
 }
 
 void KinematicsObject::Update(float deltaTs)

@@ -1,6 +1,5 @@
 #include "Application.h"
 #include "glew.h"
-#include "KinematicsObject.h"
 #include "Scene.h"
 #include <iostream>
 
@@ -104,7 +103,6 @@ bool Application::Init()
 
 	// The scene contains all the objects etc
     myScene = new Scene();
-	kinematics = new KinematicsObject();
 	SDL_ShowCursor(false);
 	input = new Input();
 
@@ -167,7 +165,6 @@ bool Application::Update()
 		for (int i = 0; i < NumOfUpdates; i++)
 		{
 			myScene->Update(dt, input);
-			kinematics->Update(dt);
 		}
 		NumOfUpdates = 0;
 		
