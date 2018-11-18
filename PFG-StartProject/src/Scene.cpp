@@ -1,5 +1,4 @@
 #include "Scene.h"
-#include "KinematicsObject.h"
 
 Scene::Scene()
 {
@@ -12,6 +11,7 @@ Scene::Scene()
 
 	//Add new kinematic and dynamic object here:
 	_kinematics = new KinematicsObject();
+	_dynamics = new DynamicObject();
 
 	// Create a game level object
 	_level = new GameObject();
@@ -60,6 +60,7 @@ Scene::Scene()
 	objectMaterial->SetLightPosition(_lightPosition);
 	// Tell the level object to use this material
 	_kinematics->SetMaterial(objectMaterial);
+	_dynamics->SetMaterial(objectMaterial);
 
 	// Set the geometry for the object
 	Mesh *modelMesh = new Mesh();
@@ -68,6 +69,7 @@ Scene::Scene()
 	// Tell the game object to use this mesh
 
 	_kinematics->SetMesh(modelMesh);
+	_dynamics->SetMesh(modelMesh);
 }
 
 Scene::~Scene()
@@ -75,6 +77,7 @@ Scene::~Scene()
 	// You should neatly clean everything up here
 	//delete _kinematics_object;
 	delete _kinematics;
+	delete _dynamics;
 	delete _level;
 	delete _camera;
 }
@@ -85,9 +88,11 @@ void Scene::Update(float deltaTs, Input* input)
 	if (input->cmd_x)
 	{
 		_kinematics->StartSimulation(true);
+		_dynamics->StartSimulation(true);
 	}
 	
 	_kinematics->Update(deltaTs);
+	_dynamics->Update(deltaTs);
 	_level->Update(deltaTs);
 	_camera->Update(input);
 
@@ -101,6 +106,7 @@ void Scene::Draw()
 	// Draw objects, giving the camera's position and projection
 	_level->Draw(_viewMatrix, _projMatrix);
 	_kinematics->Draw(_viewMatrix, _projMatrix);
+	_dynamics->Draw(_viewMatrix, _projMatrix);
 }
 
 
