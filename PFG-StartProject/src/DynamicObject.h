@@ -64,7 +64,7 @@ public:
 	/** Set velocity for the object
 	* @param glm::vec3 vel a 3D vector for the velocity of the object
 	*/
-	void SetVelocity(const glm::vec3 vel) { _velocity = vel; }
+	void SetVelocity(const glm::vec3 vel) { _vInitial = vel; }
 	/** Set scale for the object
 	* @param glm::vec3 vel a 3D vector for the scale of the object
 	*/
@@ -113,7 +113,8 @@ private:
 	glm::vec3 _position;
 	/** Velocity of the object
 	*/
-	glm::vec3 _velocity;
+	glm::vec3 _vInitial;
+	glm::vec3 _vFinish;
 	/** The mass of the object
 	*/
 	float _mass;
@@ -132,6 +133,8 @@ private:
 	/** A boolean variable to control the start of the simulation This matrix is the camera's lens
 	*/
 	bool _start;
+	
+	glm::vec3 _displacement;
 };
 
 #endif //!_DynamicObject_H_
