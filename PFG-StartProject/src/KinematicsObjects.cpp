@@ -3,9 +3,9 @@
 
 KinematicsObject::KinematicsObject()
 {
-	_position = { 0.0f, 5.0f, 0.0f };
-	_scale = { 0.3f, 0.3f, 0.3f };
-	_vInitial = { 0.0f };
+	_position = glm::vec3(-5.0f, 5.0f, -5.0f);
+	_scale = glm::vec3(0.3f, 0.3f, 0.3f);
+	_vInitial = glm::vec3(0.0f, 0.0f, 0.0f) ;
 	_acceleration = 9.8f;
 	UpdateModelMatrix();
 }

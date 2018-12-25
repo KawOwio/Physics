@@ -2,6 +2,7 @@
 #define _DynamicObject_H_
 
 #include "GameObject.h"
+#include "Utility.h"
 
 /*! \brief Brief description.
 *  This physics dynamic object class is derived from the GameObject class, as a one type/class of game objects
@@ -64,7 +65,7 @@ public:
 	/** Set velocity for the object
 	* @param glm::vec3 vel a 3D vector for the velocity of the object
 	*/
-	void SetVelocity(const glm::vec3 vel) { _vInitial = vel; }
+	void SetVelocity(const glm::vec3 vel) { _vFinish = vel; }
 	/** Set scale for the object
 	* @param glm::vec3 vel a 3D vector for the scale of the object
 	*/
@@ -94,6 +95,12 @@ public:
 	/** A boolean variable to control the start of the simulation This matrix is the camera's lens
 	*/
 	void StartSimulation(bool start) { _start = start; }
+	void SetActive(bool active) { _active = active; }
+
+	const glm::vec3 GetVelocity() const { return _vFinish; }
+
+	void CollisionResponses(float deltaTs);
+	void StringTransform(float deltaTs);
 
 private:
 
@@ -133,8 +140,13 @@ private:
 	/** A boolean variable to control the start of the simulation This matrix is the camera's lens
 	*/
 	bool _start;
+	bool _active;
 	
 	glm::vec3 _displacement;
+
+	glm::vec3 _stringPos;
+	float _stringLength;
+	float _angle; //?
 };
 
 #endif //!_DynamicObject_H_

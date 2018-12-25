@@ -11,7 +11,12 @@ Scene::Scene()
 
 	//Add new kinematic and dynamic object here:
 	_kinematics = new KinematicsObject();
-	_dynamics = new DynamicObject();
+
+	//5 balls
+	for (int i = 0; i < 5; i++)
+	{
+		_dynamics[i] = new DynamicObject();
+	}
 
 	// Create a game level object
 	_level = new GameObject();
@@ -49,18 +54,22 @@ Scene::Scene()
 	objectMaterial->LoadShaders("assets/shaders/VertShader.txt", "assets/shaders/FragShader.txt");
 	// You can set some simple material properties, these values are passed to the shader
 	// This colour modulates the texture colour
-	objectMaterial->SetDiffuseColour(glm::vec3(0.8, 0.1, 0.1));
+	objectMaterial->SetDiffuseColour(glm::vec3(1, 1, 1));
 	// The material currently supports one texture
 	// This is multiplied by all the light components (ambient, diffuse, specular)
 	// Note that the diffuse colour set with the line above will be multiplied by the texture colour
 	// If you want just the texture colour, use modelMaterial->SetDiffuseColour( glm::vec3(1,1,1) );
-	objectMaterial->SetTexture("assets/textures/default.bmp");
+	objectMaterial->SetTexture("assets/textures/metal.bmp");
 	// Need to tell the material the light's position
 	// If you change the light's position you need to call this again
 	objectMaterial->SetLightPosition(_lightPosition);
 	// Tell the level object to use this material
 	_kinematics->SetMaterial(objectMaterial);
-	_dynamics->SetMaterial(objectMaterial);
+
+	for (int i = 0; i < 5; i++)
+	{
+		_dynamics[i]->SetMaterial(objectMaterial);
+	}
 
 	// Set the geometry for the object
 	Mesh *modelMesh = new Mesh();
@@ -69,7 +78,18 @@ Scene::Scene()
 	// Tell the game object to use this mesh
 
 	_kinematics->SetMesh(modelMesh);
-	_dynamics->SetMesh(modelMesh);
+
+	_dynamics[0]->SetPosition(glm::vec3(-4.0f, 2.0f, 0.0f));
+	_dynamics[1]->SetPosition(glm::vec3(-1.0f, 2.0f, 0.0f));
+	_dynamics[2]->SetPosition(glm::vec3(0.0f, 2.0f, 10.0f));
+	_dynamics[3]->SetPosition(glm::vec3(1.0f, 2.0f, 10.0f));
+	_dynamics[4]->SetPosition(glm::vec3(2.0f, 2.0f, 10.0f));
+
+	for (int i = 0; i < 5; i++)
+	{
+		_dynamics[i]->SetMesh(modelMesh);
+		//_dynamics[i]->Update(deltaTs);
+	}
 }
 
 Scene::~Scene()
@@ -84,15 +104,39 @@ Scene::~Scene()
 
 void Scene::Update(float deltaTs, Input* input)
 {
-	// Update the game object (this is currently hard-coded motion)
+	//Start the simulation
 	if (input->cmd_x)
 	{
-		_kinematics->StartSimulation(true);
-		_dynamics->StartSimulation(true);
+		for (int i = 0; i < 2; i++)
+		{
+			_dynamics[i]->StartSimulation(true);
+		}
+		_dynamics[0]->SetActive(true);
 	}
 	
-	_kinematics->Update(deltaTs);
-	_dynamics->Update(deltaTs);
+	for (int i = 0; i < 2; i++)
+	{
+		_dynamics[i]->Update(deltaTs);
+	}
+
+	bool collision = PFG::SphereToSphereCollision(_dynamics[0]->GetPosition(), 
+		_dynamics[1]->GetPosition(), 0.50f, 0.50f, contactPosition);
+
+	if (collision)
+	{
+		std::cout << "collision\n";
+
+		glm::vec3 temp = _dynamics[1]->GetPosition();
+		temp.x += 0.1f;
+		_dynamics[1]->SetPosition(temp);
+		_dynamics[1]->SetVelocity(_dynamics[0]->GetVelocity());
+
+
+		_dynamics[0]->SetActive(false);
+		_dynamics[1]->SetActive(true);
+		
+	}
+
 	_level->Update(deltaTs);
 	_camera->Update(input);
 
@@ -106,7 +150,11 @@ void Scene::Draw()
 	// Draw objects, giving the camera's position and projection
 	_level->Draw(_viewMatrix, _projMatrix);
 	_kinematics->Draw(_viewMatrix, _projMatrix);
-	_dynamics->Draw(_viewMatrix, _projMatrix);
+
+	for (int i = 0; i < 5; i++)
+	{
+		_dynamics[i]->Draw(_viewMatrix, _projMatrix);
+	}
 }
 
 

@@ -55,7 +55,12 @@ private:
 	Camera* _camera; 
 
 	KinematicsObject* _kinematics;
-	DynamicObject* _dynamics;
+	//DynamicObject* _dynamics1;
+	DynamicObject* _dynamics[5];
+	//DynamicObject* _dynamics2;
+	//DynamicObject* _dynamics3;
+	//DynamicObject* _dynamics4;
+	//DynamicObject* _dynamics5;
 
 	/**The position for a light that lits the scene
 	*/
@@ -70,7 +75,9 @@ private:
 	*/
 	bool _simulation_start;
 
-	
+	//MOVE IT
+	glm::vec3 contactPosition;
+	int activeNum = 0;
 };
 
 #endif // !_SCENE_H_
