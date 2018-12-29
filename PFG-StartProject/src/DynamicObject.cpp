@@ -6,16 +6,17 @@ DynamicObject::DynamicObject()
 {
 	_position = glm::vec3(0.0f, 0.0f, 0.0f);
 	_scale = glm::vec3(0.5f, 0.5f, 0.5f);
-	_vInitial = glm::vec3(0.0f, 0.0f, 0.0f);
 	_vFinish = glm::vec3(0.0f, 0.0f, 0.0f);
 	_force = glm::vec3(0.0f, 0.0f, 0.0f);
-	_displacement = glm::vec3(0.0f, 0.0f, 0.0f);
 	_mass = 2.0f;
 	_start = false;
 	_active = false;
-	_bRadius = 1.0f;
+	_bRadius = 0.4999f;
 	_stringLength = 2.0f;
 	UpdateModelMatrix();
+
+	_frequency = 2 * 3.14159 * sqrt(_stringLength / 9.8);
+	std::cout << _frequency << "\n";
 }
 
 DynamicObject::~DynamicObject()
@@ -23,20 +24,35 @@ DynamicObject::~DynamicObject()
 	
 }
 
-void DynamicObject::Update(float deltaTs)
+void DynamicObject::Update(float deltaTs, bool dir)
 {
+	glm::vec3 f;
+
 	if (_start == true)
 	{
 		if (_active == true)
 		{
 			ClearForces();
-			glm::vec3 f = glm::vec3(1.0f, 0.0f, 0.0f);
+			if (dir == true)
+			{
+				f = glm::vec3(10.0f, 0.0f, 0.0f);
+			}
+			else if (dir == false)
+			{
+				f = glm::vec3(-10.0f, 0.0f, 0.0f);
+			}
+			
 			//glm::vec3 f = glm::vec3(0.0f, -9.8f * _mass, 0.0f);
 			AddForce(f);
 			//StringTransform(deltaTs);
 			CollisionResponses(deltaTs);
 			Euler(deltaTs);
 			UpdateModelMatrix();
+		}
+		else
+		{
+			//pos = start pos
+			_position = _startPos;
 		}
 	}
 	else
@@ -47,12 +63,11 @@ void DynamicObject::Update(float deltaTs)
 
 void DynamicObject::Euler(float deltaTs)
 {
-	_vFinish = _vInitial + (_force / _mass) * deltaTs;
-	_position  += _vFinish * deltaTs;
-
-	_vInitial = _vFinish;
+	_vFinish = _vFinish + (_force / _mass) * deltaTs;
+	_position += _vFinish * deltaTs;
 }
 
+//NOT USED
 void DynamicObject::CollisionResponses(float deltaTs)
 {
 	//Set plane parametrs
@@ -69,7 +84,7 @@ void DynamicObject::CollisionResponses(float deltaTs)
 	if (collision)
 	{
 		std::cout << "*";
-		ClearForces();
+		//ClearForces();
 	}
 }
 
@@ -77,12 +92,13 @@ void DynamicObject::StringTransform(float deltaTs)
 {
 	if (_position.y > 2.0f)
 	{
-
+		glm::vec3 f = glm::vec3(0.0f, (-9.8f * _mass), 0.0f);
+		AddForce(f);
 	}
 	if (_position.y <= 2.0f)
 	{
-		glm::vec3 f = glm::vec3(0.0f, -(-9.8f * _mass), 0.0f);
-		AddForce(f);
+		ClearForces();
+		_position.y = 2.0f;
 	}
 }
 
@@ -90,4 +106,11 @@ void DynamicObject::UpdateModelMatrix()
 {
 	_modelMatrix = glm::translate(glm::mat4(1.0f), _position);
 	_modelMatrix = glm::scale(_modelMatrix, _scale);
+}
+
+void DynamicObject::HorizontalPositionCalc()
+{
+	int a = 1;
+	int q = 0;
+	_position.y = a / _position.x + q;
 }

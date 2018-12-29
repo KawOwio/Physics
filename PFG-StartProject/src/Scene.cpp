@@ -79,23 +79,26 @@ Scene::Scene()
 
 	_kinematics->SetMesh(modelMesh);
 
-	_dynamics[0]->SetPosition(glm::vec3(-4.0f, 2.0f, 0.0f));
-	_dynamics[1]->SetPosition(glm::vec3(-1.0f, 2.0f, 0.0f));
-	_dynamics[2]->SetPosition(glm::vec3(0.0f, 2.0f, 10.0f));
-	_dynamics[3]->SetPosition(glm::vec3(1.0f, 2.0f, 10.0f));
-	_dynamics[4]->SetPosition(glm::vec3(2.0f, 2.0f, 10.0f));
+	_dynamics[0]->SetStartPos(glm::vec3(-2.0f, 2.0f, 0.0f));
+	_dynamics[1]->SetStartPos(glm::vec3(-1.0f, 2.0f, 0.0f));
+	_dynamics[2]->SetStartPos(glm::vec3(0.0f, 2.0f, 0.0f));
+	_dynamics[3]->SetStartPos(glm::vec3(1.0f, 2.0f, 0.0f));
+	_dynamics[4]->SetStartPos(glm::vec3(2.0f, 2.0f, 0.0f));
+
+	_dynamics[0]->SetEndPoint(-3.0f);
+	_dynamics[4]->SetEndPoint(3.0f);
 
 	for (int i = 0; i < 5; i++)
 	{
 		_dynamics[i]->SetMesh(modelMesh);
 		//_dynamics[i]->Update(deltaTs);
 	}
+	_direction = true;
 }
 
 Scene::~Scene()
 {
 	// You should neatly clean everything up here
-	//delete _kinematics_object;
 	delete _kinematics;
 	delete _dynamics;
 	delete _level;
@@ -104,37 +107,111 @@ Scene::~Scene()
 
 void Scene::Update(float deltaTs, Input* input)
 {
+	bool collision[5] = { false };
+	float f = _dynamics[0]->GetBoundingRadius() - 0.01f;
+
 	//Start the simulation
 	if (input->cmd_x)
 	{
-		for (int i = 0; i < 2; i++)
+		_dynamics[0]->SetPosition(glm::vec3(-3.0f, 2.0f, 0.0f));
+		for (int i = 0; i < 5; i++)
 		{
 			_dynamics[i]->StartSimulation(true);
 		}
 		_dynamics[0]->SetActive(true);
 	}
 	
-	for (int i = 0; i < 2; i++)
+	//right
+	if (_direction == true)
 	{
-		_dynamics[i]->Update(deltaTs);
+		for (int i = 0; i < 5; i++)
+		{
+			if (i < 4)
+			{
+				collision[i] = PFG::SphereToSphereCollision(_dynamics[i]->GetPosition(),
+					_dynamics[i + 1]->GetPosition(), f, f, contactPosition);
+			}
+
+			if (collision[i])
+			{
+				glm::vec3 temp;
+
+				if (i < 4)
+					temp = _dynamics[i + 1]->GetPosition();
+				else
+					temp = _dynamics[i]->GetPosition();
+
+				temp.x += 0.01f;
+
+				if (i < 4)
+				{
+					_dynamics[i + 1]->SetPosition(temp);
+					_dynamics[i + 1]->SetVelocity(_dynamics[i]->GetVelocity());
+
+					_dynamics[i]->SetActive(false);
+					_dynamics[i + 1]->SetActive(true);
+				}
+			}
+
+			glm::vec3 end = _dynamics[i]->GetPosition();
+			std::cout << "Pos x: " << end.x << std::endl;
+			if (_dynamics[4]->GetActive() == true && end.x >= 3.0f)
+			{
+				std::cout << "**************************************************";
+				_direction = false;
+				_dynamics[i]->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+			}
+		}
 	}
 
-	bool collision = PFG::SphereToSphereCollision(_dynamics[0]->GetPosition(), 
-		_dynamics[1]->GetPosition(), 0.50f, 0.50f, contactPosition);
-
-	if (collision)
+	if (_direction == false)
 	{
-		std::cout << "collision\n";
+		for (int i = 4; i >= 0; i--)
+		{
+			if (i > 0)
+			{
+				collision[i] = PFG::SphereToSphereCollision(_dynamics[i - 1]->GetPosition(),
+					_dynamics[i]->GetPosition(), f, f, contactPosition);
+			}
 
-		glm::vec3 temp = _dynamics[1]->GetPosition();
-		temp.x += 0.1f;
-		_dynamics[1]->SetPosition(temp);
-		_dynamics[1]->SetVelocity(_dynamics[0]->GetVelocity());
+			if (collision[i])
+			{
+				std::cout << "collision\n";
+				glm::vec3 temp;
 
+				if (i > 0)
+					temp = _dynamics[i - 1]->GetPosition();
+				else
+					temp = _dynamics[i]->GetPosition();
 
-		_dynamics[0]->SetActive(false);
-		_dynamics[1]->SetActive(true);
-		
+				temp.x -= 0.01f;
+
+				if (i > 0)
+				{
+					_dynamics[i - 1]->SetPosition(temp);
+					_dynamics[i - 1]->SetVelocity(_dynamics[i]->GetVelocity());
+
+					_dynamics[i]->SetActive(false);
+					_dynamics[i - 1]->SetActive(true);
+
+					std::cout << i - 1 << " active\n";
+				}
+			}
+			glm::vec3 end = _dynamics[i]->GetPosition();
+			std::cout << "Pos x: " << end.x << std::endl;
+			if (_dynamics[0]->GetActive() == true && end.x <= -3.0f)
+			{
+				std::cout << "**************************************************";
+				_direction = true;
+				_dynamics[i]->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
+			}
+		}
+	}
+
+	//Update for all cradles
+	for (int i = 0; i < 5; i++)
+	{
+		_dynamics[i]->Update(deltaTs, _direction);
 	}
 
 	_level->Update(deltaTs);

@@ -31,7 +31,7 @@ public:
 	*   next procedure.
 	*   @param float deltaTs simulation time step length
 	*/
-	virtual void Update(float deltaTs);
+	virtual void Update(float deltaTs, bool dir);
 
 	/** Add force that acts on the object to the total force for physics computation
 	*  
@@ -96,10 +96,15 @@ public:
 	*/
 	void StartSimulation(bool start) { _start = start; }
 	void SetActive(bool active) { _active = active; }
+	void SetEndPoint(float endPoint) { _endPoint = endPoint; }
+	void SetStartPos(glm::vec3 startPos) { _startPos = _position = startPos; }
 
 	const glm::vec3 GetVelocity() const { return _vFinish; }
+	const bool GetActive() const { return _active; }
 
 	void CollisionResponses(float deltaTs);
+	void HorizontalPositionCalc();
+
 	void StringTransform(float deltaTs);
 
 private:
@@ -120,7 +125,6 @@ private:
 	glm::vec3 _position;
 	/** Velocity of the object
 	*/
-	glm::vec3 _vInitial;
 	glm::vec3 _vFinish;
 	/** The mass of the object
 	*/
@@ -142,9 +146,13 @@ private:
 	bool _start;
 	bool _active;
 	
-	glm::vec3 _displacement;
 
-	glm::vec3 _stringPos;
+	//for pendulum
+	float _frequency;	//?
+
+	glm::vec3 _stringPos;	//?
+	float _endPoint;
+	glm::vec3 _startPos;
 	float _stringLength;
 	float _angle; //?
 };
