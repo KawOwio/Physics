@@ -24,7 +24,7 @@ DynamicObject::~DynamicObject()
 	
 }
 
-void DynamicObject::Update(float deltaTs, bool dir)
+void DynamicObject::Update(float deltaTs, bool dir, const glm::vec3& c0, const glm::vec3& c1)
 {
 	glm::vec3 f;
 
@@ -45,7 +45,7 @@ void DynamicObject::Update(float deltaTs, bool dir)
 			//glm::vec3 f = glm::vec3(0.0f, -9.8f * _mass, 0.0f);
 			AddForce(f);
 			//StringTransform(deltaTs);
-			CollisionResponses(deltaTs);
+			CollisionResponses(deltaTs, c0, c1);
 			Euler(deltaTs);
 			UpdateModelMatrix();
 		}
@@ -67,8 +67,7 @@ void DynamicObject::Euler(float deltaTs)
 	_position += _vFinish * deltaTs;
 }
 
-//NOT USED
-void DynamicObject::CollisionResponses(float deltaTs)
+void DynamicObject::CollisionResponses(float deltaTs, const glm::vec3& c0, const glm::vec3& c1)
 {
 	//Set plane parametrs
 	glm::vec3 n(0.0f, 1.0f, 0.0f);	//the normal of the plane pointing up
@@ -77,14 +76,13 @@ void DynamicObject::CollisionResponses(float deltaTs)
 	float d = PFG::DistanceToPlane(n, _position, q);
 
 	glm::vec3 contactPosition;
-	glm::vec3 c1 = _position + _vFinish * deltaTs;
-	glm::vec3 c0 = _position;
-	bool collision = PFG::MovingSpehereToPlaneCollision2(n, c0, c1, q, contactPosition, _bRadius);
-	
+
+	//bool collision = PFG::MovingSpehereToPlaneCollision2(n, c0, c1, q, contactPosition, _bRadius);
+	bool collision = PFG::SphereToSphereCollision(c0, c1, _bRadius, _bRadius, contactPosition);
 	if (collision)
 	{
-		std::cout << "*";
-		//ClearForces();
+		std::cout << "test";
+		
 	}
 }
 

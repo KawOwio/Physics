@@ -1,10 +1,10 @@
 #include "Utility.h"
-
+#include <iostream>
 namespace PFG
 {
 	/*	Variables:
 	*	d - distance
-	*	n - plane norm vector
+	*	n - norm vector
 	*	q - point on the plane
 	*	p - point in 3D		*/
 	float DistanceToPlane(const glm::vec3& n, const glm::vec3& p, const glm::vec3& q)
@@ -55,12 +55,12 @@ namespace PFG
 	bool SphereToSphereCollision(const glm::vec3& c0, const glm::vec3& c1,
 		float r1, float r2, glm::vec3& cp)
 	{
-		float d = glm::length(c0 - c1);
+		float d = glm::length(c1 - c0);
 		glm::vec3 n;
 
 		if (d <= (r1 + r2))
 		{
-			n = glm::normalize(c0 - c1);
+			n = glm::normalize(c0 - c1 + 0.01f);
 			cp = r1 * n;
 			return true;
 		}

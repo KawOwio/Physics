@@ -108,7 +108,7 @@ Scene::~Scene()
 void Scene::Update(float deltaTs, Input* input)
 {
 	bool collision[5] = { false };
-	float f = _dynamics[0]->GetBoundingRadius() - 0.01f;
+	float f = _dynamics[0]->GetBoundingRadius();
 
 	//Start the simulation
 	if (input->cmd_x)
@@ -141,11 +141,11 @@ void Scene::Update(float deltaTs, Input* input)
 				else
 					temp = _dynamics[i]->GetPosition();
 
-				temp.x += 0.01f;
+				//temp.x += 0.01f;
 
 				if (i < 4)
 				{
-					_dynamics[i + 1]->SetPosition(temp);
+					//_dynamics[i + 1]->SetPosition(temp);
 					_dynamics[i + 1]->SetVelocity(_dynamics[i]->GetVelocity());
 
 					_dynamics[i]->SetActive(false);
@@ -154,7 +154,7 @@ void Scene::Update(float deltaTs, Input* input)
 			}
 
 			glm::vec3 end = _dynamics[i]->GetPosition();
-			std::cout << "Pos x: " << end.x << std::endl;
+			//std::cout << "Pos x: " << end.x << std::endl;
 			if (_dynamics[4]->GetActive() == true && end.x >= 3.0f)
 			{
 				std::cout << "**************************************************";
@@ -180,15 +180,19 @@ void Scene::Update(float deltaTs, Input* input)
 				glm::vec3 temp;
 
 				if (i > 0)
+				{
 					temp = _dynamics[i - 1]->GetPosition();
+				}
 				else
+				{
 					temp = _dynamics[i]->GetPosition();
+				}
 
 				temp.x -= 0.01f;
 
 				if (i > 0)
 				{
-					_dynamics[i - 1]->SetPosition(temp);
+					//_dynamics[i - 1]->SetPosition(temp);
 					_dynamics[i - 1]->SetVelocity(_dynamics[i]->GetVelocity());
 
 					_dynamics[i]->SetActive(false);
@@ -198,7 +202,7 @@ void Scene::Update(float deltaTs, Input* input)
 				}
 			}
 			glm::vec3 end = _dynamics[i]->GetPosition();
-			std::cout << "Pos x: " << end.x << std::endl;
+			//std::cout << "Pos x: " << end.x << std::endl;
 			if (_dynamics[0]->GetActive() == true && end.x <= -3.0f)
 			{
 				std::cout << "**************************************************";
@@ -211,7 +215,16 @@ void Scene::Update(float deltaTs, Input* input)
 	//Update for all cradles
 	for (int i = 0; i < 5; i++)
 	{
-		_dynamics[i]->Update(deltaTs, _direction);
+		if (i < 4)
+		{
+			_dynamics[i]->Update(deltaTs, _direction,
+				_dynamics[i]->GetPosition(), _dynamics[i + 1]->GetPosition());
+		}
+		else
+		{
+			_dynamics[i]->Update(deltaTs, _direction,
+				_dynamics[i]->GetPosition(), _dynamics[i - 1]->GetPosition());
+		}
 	}
 
 	_level->Update(deltaTs);

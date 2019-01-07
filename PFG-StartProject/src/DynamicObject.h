@@ -31,7 +31,7 @@ public:
 	*   next procedure.
 	*   @param float deltaTs simulation time step length
 	*/
-	virtual void Update(float deltaTs, bool dir);
+	virtual void Update(float deltaTs, bool dir, const glm::vec3& c0, const glm::vec3& c1);
 
 	/** Add force that acts on the object to the total force for physics computation
 	*  
@@ -102,10 +102,10 @@ public:
 	const glm::vec3 GetVelocity() const { return _vFinish; }
 	const bool GetActive() const { return _active; }
 
-	void CollisionResponses(float deltaTs);
-	void HorizontalPositionCalc();
+	void CollisionResponses(float deltaTs, const glm::vec3& c0, const glm::vec3& c1);
 
-	void StringTransform(float deltaTs);
+	void HorizontalPositionCalc();			//???
+	void StringTransform(float deltaTs);	//???
 
 private:
 
