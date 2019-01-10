@@ -6,17 +6,13 @@ DynamicObject::DynamicObject()
 {
 	_position = glm::vec3(0.0f, 0.0f, 0.0f);
 	_scale = glm::vec3(0.5f, 0.5f, 0.5f);
-	_vFinish = glm::vec3(0.0f, 0.0f, 0.0f);
+	_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 	_force = glm::vec3(0.0f, 0.0f, 0.0f);
 	_mass = 2.0f;
 	_start = false;
 	_active = false;
-	_bRadius = 0.4999f;
-	_stringLength = 2.0f;
+	_bRadius = 0.499999f;
 	UpdateModelMatrix();
-
-	_frequency = 2 * 3.14159 * sqrt(_stringLength / 9.8);
-	std::cout << _frequency << "\n";
 }
 
 DynamicObject::~DynamicObject()
@@ -26,7 +22,7 @@ DynamicObject::~DynamicObject()
 
 void DynamicObject::Update(float deltaTs, bool dir, const glm::vec3& c0, const glm::vec3& c1)
 {
-	glm::vec3 f;
+	glm::vec3 force;
 
 	if (_start == true)
 	{
@@ -35,23 +31,19 @@ void DynamicObject::Update(float deltaTs, bool dir, const glm::vec3& c0, const g
 			ClearForces();
 			if (dir == true)
 			{
-				f = glm::vec3(10.0f, 0.0f, 0.0f);
+				force = glm::vec3(10.0f, 0.0f, 0.0f);
 			}
 			else if (dir == false)
 			{
-				f = glm::vec3(-10.0f, 0.0f, 0.0f);
+				force = glm::vec3(-10.0f, 0.0f, 0.0f);
 			}
 			
-			//glm::vec3 f = glm::vec3(0.0f, -9.8f * _mass, 0.0f);
-			AddForce(f);
-			//StringTransform(deltaTs);
-			CollisionResponses(deltaTs, c0, c1);
-			Euler(deltaTs);
+			AddForce(force);
+			RungeKutta2(deltaTs);
 			UpdateModelMatrix();
 		}
 		else
 		{
-			//pos = start pos
 			_position = _startPos;
 		}
 	}
@@ -63,52 +55,63 @@ void DynamicObject::Update(float deltaTs, bool dir, const glm::vec3& c0, const g
 
 void DynamicObject::Euler(float deltaTs)
 {
-	_vFinish = _vFinish + (_force / _mass) * deltaTs;
-	_position += _vFinish * deltaTs;
+	_velocity = _velocity + (_force / _mass) * deltaTs;
+	_position += _velocity * deltaTs;
+} 
+
+void DynamicObject::RungeKutta2(float deltaTs)
+{
+	glm::vec3 force;
+	glm::vec3 acceleration;
+	glm::vec3 k[2];
+
+	//Evaluate once at t0
+	force = _force;
+	acceleration = force / _mass;
+	k[0] = deltaTs * acceleration;
+
+	//Evaluate once at t0 + deltaTs/2.0 using half of k0
+	force = _force + k[0] / 2.0f;
+	acceleration = force / _mass;
+	k[1] = deltaTs * acceleration;
+
+	//Evalueate once at t0 + deltaTs using k1
+	_velocity += k[1];
+	_position += _velocity * deltaTs;
 }
 
-void DynamicObject::CollisionResponses(float deltaTs, const glm::vec3& c0, const glm::vec3& c1)
+void DynamicObject::RungeKutta4(float deltaTs)
 {
-	//Set plane parametrs
-	glm::vec3 n(0.0f, 1.0f, 0.0f);	//the normal of the plane pointing up
-	glm::vec3 q(0.0f, 0.0f, 0.0f);
+	glm::vec3 force;
+	glm::vec3 acceleration;
+	glm::vec3 k[4];
 
-	float d = PFG::DistanceToPlane(n, _position, q);
+	//Evaluate once at t0
+	force = _force;
+	acceleration = force / _mass;
+	k[0] = deltaTs * acceleration;
 
-	glm::vec3 contactPosition;
+	//Evaluate once at t0 + deltaTs/2.0 using half of k0
+	force = _force + k[0] / 2.0f;
+	acceleration = force / _mass;
+	k[1] = deltaTs * acceleration;
 
-	//bool collision = PFG::MovingSpehereToPlaneCollision2(n, c0, c1, q, contactPosition, _bRadius);
-	bool collision = PFG::SphereToSphereCollision(c0, c1, _bRadius, _bRadius, contactPosition);
-	if (collision)
-	{
-		std::cout << "test";
-		
-	}
-}
+	force = _force + k[1] / 2.0f;
+	acceleration = force / _mass;
+	k[2] = deltaTs * acceleration;
 
-void DynamicObject::StringTransform(float deltaTs)
-{
-	if (_position.y > 2.0f)
-	{
-		glm::vec3 f = glm::vec3(0.0f, (-9.8f * _mass), 0.0f);
-		AddForce(f);
-	}
-	if (_position.y <= 2.0f)
-	{
-		ClearForces();
-		_position.y = 2.0f;
-	}
+	//Evaluate once at t0 + deltaTs using k2
+	force = _force + k[2];
+	acceleration = force / _mass;
+	k[3] = deltaTs * acceleration;
+
+	//evaluate at t0 + deltaTs using weighted sum of k0, k1, k2 and k3
+	_velocity += (k[0] + 2.0f * k[1] + 2.0f * k[2] + k[3]) / 6.0f;
+	_position += _velocity * deltaTs;
 }
 
 void DynamicObject::UpdateModelMatrix()
 {
 	_modelMatrix = glm::translate(glm::mat4(1.0f), _position);
 	_modelMatrix = glm::scale(_modelMatrix, _scale);
-}
-
-void DynamicObject::HorizontalPositionCalc()
-{
-	int a = 1;
-	int q = 0;
-	_position.y = a / _position.x + q;
 }

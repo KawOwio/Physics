@@ -82,7 +82,7 @@ private:
 	bool _start;
 
 	glm::vec3 _vInitial;
-	glm::vec3 _vFinish;
+	glm::vec3 _velocity;
 	float _acceleration;
 	glm::vec3 _distance;
 };

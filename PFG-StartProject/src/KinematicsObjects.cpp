@@ -18,12 +18,12 @@ void KinematicsObject::Update(float deltaTs)
 {
 	if (_start == true)
 	{
-		_vFinish.y = _vInitial.y + _acceleration * deltaTs;
-		_distance.y = ((_vInitial.y + _vFinish.y) / 2) * deltaTs;
+		_velocity.y = _vInitial.y + _acceleration * deltaTs;
+		_distance.y = ((_vInitial.y + _velocity.y) / 2) * deltaTs;
 
 		_position.y -= _distance.y;
 
-		_vInitial = _vFinish;
+		_vInitial = _velocity;
 
 		UpdateModelMatrix();
 	}

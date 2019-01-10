@@ -58,9 +58,11 @@ namespace PFG
 		float d = glm::length(c1 - c0);
 		glm::vec3 n;
 
-		if (d <= (r1 + r2))
+		float temp = r1 + r2;
+
+		if (d <= temp)
 		{
-			n = glm::normalize(c0 - c1 + 0.01f);
+			n = glm::normalize(c0 - c1);
 			cp = r1 * n;
 			return true;
 		}

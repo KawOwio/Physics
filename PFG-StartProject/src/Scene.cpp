@@ -79,19 +79,21 @@ Scene::Scene()
 
 	_kinematics->SetMesh(modelMesh);
 
+	//Set starting positions
 	_dynamics[0]->SetStartPos(glm::vec3(-2.0f, 2.0f, 0.0f));
 	_dynamics[1]->SetStartPos(glm::vec3(-1.0f, 2.0f, 0.0f));
 	_dynamics[2]->SetStartPos(glm::vec3(0.0f, 2.0f, 0.0f));
 	_dynamics[3]->SetStartPos(glm::vec3(1.0f, 2.0f, 0.0f));
 	_dynamics[4]->SetStartPos(glm::vec3(2.0f, 2.0f, 0.0f));
 
+	//Set "end positions"
+	//When cradles are gonna change the direction
 	_dynamics[0]->SetEndPoint(-3.0f);
 	_dynamics[4]->SetEndPoint(3.0f);
 
 	for (int i = 0; i < 5; i++)
 	{
 		_dynamics[i]->SetMesh(modelMesh);
-		//_dynamics[i]->Update(deltaTs);
 	}
 	_direction = true;
 }
@@ -116,6 +118,7 @@ void Scene::Update(float deltaTs, Input* input)
 		_dynamics[0]->SetPosition(glm::vec3(-3.0f, 2.0f, 0.0f));
 		for (int i = 0; i < 5; i++)
 		{
+			_kinematics->StartSimulation(true);
 			_dynamics[i]->StartSimulation(true);
 		}
 		_dynamics[0]->SetActive(true);
@@ -126,6 +129,7 @@ void Scene::Update(float deltaTs, Input* input)
 	{
 		for (int i = 0; i < 5; i++)
 		{
+			//Checking colliison of all cradles
 			if (i < 4)
 			{
 				collision[i] = PFG::SphereToSphereCollision(_dynamics[i]->GetPosition(),
@@ -134,32 +138,31 @@ void Scene::Update(float deltaTs, Input* input)
 
 			if (collision[i])
 			{
-				glm::vec3 temp;
-
-				if (i < 4)
-					temp = _dynamics[i + 1]->GetPosition();
-				else
-					temp = _dynamics[i]->GetPosition();
-
-				//temp.x += 0.01f;
-
 				if (i < 4)
 				{
-					//_dynamics[i + 1]->SetPosition(temp);
-					_dynamics[i + 1]->SetVelocity(_dynamics[i]->GetVelocity());
-
+					//Chaning active cradle to the next one
 					_dynamics[i]->SetActive(false);
 					_dynamics[i + 1]->SetActive(true);
+
+					//Impulse (passing velocity)
+					float impulseFloat = glm::dot((-(1.0f + 0.5f) *
+						(_dynamics[i]->GetVelocity() - _dynamics[i + 1]->GetVelocity())), _dynamics[i]->GetContactPos())
+						/ ((1 / _dynamics[i]->GetMass()) + (1 / _dynamics[i + 1]->GetMass()));
+
+					glm::vec3 impulseVec = impulseFloat * _dynamics[i]->GetContactPos();
+					glm::vec3 newVelocityActive = impulseVec / _dynamics[i + 1]->GetMass();
+					glm::vec3 newVelocityRest = -impulseVec / _dynamics[i + 1]->GetMass();
+					_dynamics[i]->SetVelocity(newVelocityRest);
+					_dynamics[i + 1]->SetVelocity(newVelocityActive);
 				}
 			}
-
+			
+			//If reaches "the end" -> change direction
 			glm::vec3 end = _dynamics[i]->GetPosition();
-			//std::cout << "Pos x: " << end.x << std::endl;
 			if (_dynamics[4]->GetActive() == true && end.x >= 3.0f)
 			{
-				std::cout << "**************************************************";
+				std::cout << "\n**************************************************\n";
 				_direction = false;
-				_dynamics[i]->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
 			}
 		}
 	}
@@ -168,6 +171,7 @@ void Scene::Update(float deltaTs, Input* input)
 	{
 		for (int i = 4; i >= 0; i--)
 		{
+			//Checking colliison of all cradles
 			if (i > 0)
 			{
 				collision[i] = PFG::SphereToSphereCollision(_dynamics[i - 1]->GetPosition(),
@@ -176,38 +180,32 @@ void Scene::Update(float deltaTs, Input* input)
 
 			if (collision[i])
 			{
-				std::cout << "collision\n";
-				glm::vec3 temp;
-
+				
 				if (i > 0)
 				{
-					temp = _dynamics[i - 1]->GetPosition();
-				}
-				else
-				{
-					temp = _dynamics[i]->GetPosition();
-				}
-
-				temp.x -= 0.01f;
-
-				if (i > 0)
-				{
-					//_dynamics[i - 1]->SetPosition(temp);
-					_dynamics[i - 1]->SetVelocity(_dynamics[i]->GetVelocity());
-
+					//Chaning active cradle to the next one
 					_dynamics[i]->SetActive(false);
 					_dynamics[i - 1]->SetActive(true);
 
-					std::cout << i - 1 << " active\n";
+					//Impulse
+					float impulseFloat = glm::dot((-(1.0f + 0.5f) *
+						(_dynamics[i]->GetVelocity() - _dynamics[i - 1]->GetVelocity())), _dynamics[i]->GetContactPos())
+						/ ((1 / _dynamics[i]->GetMass()) + (1 / _dynamics[i - 1]->GetMass()));
+
+					glm::vec3 impulseVec = impulseFloat * _dynamics[i]->GetContactPos();
+					glm::vec3 newVelocityActive = impulseVec / _dynamics[i - 1]->GetMass();
+					glm::vec3 newVelocityRest = -impulseVec / _dynamics[i - 1]->GetMass();
+					_dynamics[i]->SetVelocity(newVelocityRest);
+					_dynamics[i - 1]->SetVelocity(newVelocityActive);
 				}
 			}
+
+			//If reaches "the end" -> change direction
 			glm::vec3 end = _dynamics[i]->GetPosition();
-			//std::cout << "Pos x: " << end.x << std::endl;
 			if (_dynamics[0]->GetActive() == true && end.x <= -3.0f)
 			{
-				std::cout << "**************************************************";
+				std::cout << "\n**************************************************\n";
 				_direction = true;
-				_dynamics[i]->SetVelocity(glm::vec3(0.0f, 0.0f, 0.0f));
 			}
 		}
 	}
@@ -227,6 +225,7 @@ void Scene::Update(float deltaTs, Input* input)
 		}
 	}
 
+	_kinematics->Update(deltaTs);
 	_level->Update(deltaTs);
 	_camera->Update(input);
 

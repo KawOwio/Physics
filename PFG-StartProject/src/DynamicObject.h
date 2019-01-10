@@ -45,6 +45,9 @@ public:
 	*/
 	 void Euler(float deltaTs);
 
+	 void RungeKutta2(float deltaTs);
+	 void RungeKutta4(float deltaTs);
+
 	/** Set force for the object
 	* @param glm::vec3 force a 3D vector for the force acting on the object
 	*/
@@ -65,7 +68,7 @@ public:
 	/** Set velocity for the object
 	* @param glm::vec3 vel a 3D vector for the velocity of the object
 	*/
-	void SetVelocity(const glm::vec3 vel) { _vFinish = vel; }
+	void SetVelocity(const glm::vec3 vel) { _velocity = vel; }
 	/** Set scale for the object
 	* @param glm::vec3 vel a 3D vector for the scale of the object
 	*/
@@ -99,13 +102,9 @@ public:
 	void SetEndPoint(float endPoint) { _endPoint = endPoint; }
 	void SetStartPos(glm::vec3 startPos) { _startPos = _position = startPos; }
 
-	const glm::vec3 GetVelocity() const { return _vFinish; }
+	glm::vec3 GetContactPos() { return _contactPosition; }
+	glm::vec3 GetVelocity() { return _velocity; }
 	const bool GetActive() const { return _active; }
-
-	void CollisionResponses(float deltaTs, const glm::vec3& c0, const glm::vec3& c1);
-
-	void HorizontalPositionCalc();			//???
-	void StringTransform(float deltaTs);	//???
 
 private:
 
@@ -125,7 +124,7 @@ private:
 	glm::vec3 _position;
 	/** Velocity of the object
 	*/
-	glm::vec3 _vFinish;
+	glm::vec3 _velocity;
 	/** The mass of the object
 	*/
 	float _mass;
@@ -144,17 +143,13 @@ private:
 	/** A boolean variable to control the start of the simulation This matrix is the camera's lens
 	*/
 	bool _start;
+	//Boolean to control currently active cradle
 	bool _active;
 	
+	glm::vec3 _contactPosition;
 
-	//for pendulum
-	float _frequency;	//?
-
-	glm::vec3 _stringPos;	//?
 	float _endPoint;
 	glm::vec3 _startPos;
-	float _stringLength;
-	float _angle; //?
 };
 
 #endif //!_DynamicObject_H_

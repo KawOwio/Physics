@@ -1,3 +1,9 @@
+//**********************************************************//
+//			Physics Simulation: Newton's Cradles			//
+//			Created by Nikita Gribuska (s5065617)			//
+//  	GitHub link: https://github.com/s5065617/Physics	//
+//**********************************************************//
+
 #include "Application.h"
 
 /**
